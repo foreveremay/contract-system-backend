@@ -8,3 +8,8 @@ packaging==25.0
 psycopg2-binary==2.9.10
 sqlparse==0.5.3
 typing_extensions==4.14.1
+<<<<<<< Updated upstream
+=======
+whitenoise==6.6.0
+djangorestframework-nested==0.1.4
+>>>>>>> Stashed changes
