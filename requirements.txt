@@ -1,18 +1,12 @@
-asgiref==3.9.1
-dj-database-url==3.0.1
-Django==4.2.23
-django-cors-headers==4.7.0
-djangorestframework==3.16.0
-gunicorn==23.0.0
-packaging==25.0
-psycopg2-binary==2.9.10
-sqlparse==0.5.3
-typing_extensions==4.14.1
-<<<<<<< Updated upstream
-=======
+asgiref==3.9.1  
+dj-database-url==3.0.1  
+Django==4.2.23  
+django-cors-headers==4.7.0  
+djangorestframework==3.16.0  
+djangorestframework-nested==0.1.4  
+gunicorn==23.0.0  
+packaging==25.0  
+psycopg2-binary==2.9.10  
+sqlparse==0.5.3  
+typing_extensions==4.14.1  
 whitenoise==6.6.0
-djangorestframework-nested==0.1.4
-<<<<<<< Updated upstream
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
