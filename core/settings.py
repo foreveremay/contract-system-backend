@@ -5,22 +5,24 @@ from pathlib import Path
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
-
 # SECURITY WARNING: keep the secret key used in production secret!
-# 我們將從環境變數讀取 SECRET_KEY，如果沒有，就用一個不安全的開發用金鑰
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-fallback-key-for-development')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-# 如果環境變數沒有設定 'DEBUG' 為 'False'，預設就是 True (開發模式)
-DEBUG = os.environ.get('DEBUG', 'True') == 'True'
+# 如果環境變數 RENDER 是 'true'，則 DEBUG 為 False
+IS_PRODUCTION = os.environ.get('RENDER') == 'true'
+DEBUG = not IS_PRODUCTION
 
 # 允許的主機名稱
-ALLOWED_HOSTS = []
-RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
-if RENDER_EXTERNAL_HOSTNAME:
-    ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
+# 在生產環境中，允許 Render 的網址以及所有來源
+if IS_PRODUCTION:
+    ALLOWED_HOSTS = ['*']
+    RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
+    if RENDER_EXTERNAL_HOSTNAME:
+        ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
+else:
+    ALLOWED_HOSTS = []
+
 
 # Application definition
 INSTALLED_APPS = [
@@ -29,19 +31,21 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
+    'whitenoise.runserver_nostatic', # 新增
     'django.contrib.staticfiles',
     # 我們的 App
     'contracts',
     # 第三方 Apps
     'rest_framework',
     'corsheaders',
+    'rest_framework_nested', # 新增
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware', # WhiteNoise 中介軟體
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'corsheaders.middleware.CorsMiddleware', # CORS 中介軟體
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -71,14 +75,21 @@ WSGI_APPLICATION = 'core.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
-# 使用 dj-database-url 來設定資料庫
-DATABASES = {
-    'default': dj_database_url.config(
-        # 如果環境變數沒有 DATABASE_URL，就使用本地的 sqlite
-        default=f'sqlite:///{BASE_DIR / "db.sqlite3"}',
-        conn_max_age=600
-    )
-}
+if IS_PRODUCTION:
+    DATABASES = {
+        'default': dj_database_url.config(
+            conn_max_age=600,
+            ssl_require=True, # 正式環境強制使用 SSL
+        )
+    }
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
+
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
@@ -99,9 +110,7 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 STATIC_URL = 'static/'
-# 告訴 Django 在部署時，將所有靜態檔案收集到這個資料夾
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-# 設定 WhiteNoise 的儲存方式
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 
@@ -110,4 +119,4 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # CORS (跨來源資源共用) 設定
-CORS_ALLOW_ALL_ORIGINS = True # 為了方便，暫時允許所有來源
+CORS_ALLOW_ALL_ORIGINS = True
