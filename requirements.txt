@@ -12,4 +12,7 @@ typing_extensions==4.14.1
 =======
 whitenoise==6.6.0
 djangorestframework-nested==0.1.4
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
